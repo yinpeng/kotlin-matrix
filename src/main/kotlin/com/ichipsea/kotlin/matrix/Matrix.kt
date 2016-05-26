@@ -62,7 +62,7 @@ abstract class AbstractMatrix<out T>: Matrix<T> {
     }
 }
 
-private open class TransposedMatrix<out T>(private val original: Matrix<T>): AbstractMatrix<T>() {
+internal open class TransposedMatrix<out T>(private val original: Matrix<T>): AbstractMatrix<T>() {
     override val cols: Int
         get() = original.rows
 
@@ -72,7 +72,7 @@ private open class TransposedMatrix<out T>(private val original: Matrix<T>): Abs
     override fun get(x: Int, y: Int): T = original[y, x]
 }
 
-private class TransposedMutableMatrix<T>(private val original: MutableMatrix<T>) :
+internal class TransposedMutableMatrix<T>(private val original: MutableMatrix<T>) :
         TransposedMatrix<T>(original), MutableMatrix<T> {
     override fun set(x: Int, y: Int, value: T) {
         original[y, x] = value
@@ -81,20 +81,21 @@ private class TransposedMutableMatrix<T>(private val original: MutableMatrix<T>)
 
 fun <T> Matrix<T>.transposedView() : Matrix<T> = TransposedMatrix(this)
 
-open class ArrayMatrix<out T>(override val cols: Int, override val rows: Int, private val array: Array<T>) :
+internal open class ArrayMatrix<out T>(override val cols: Int, override val rows: Int, private val array: Array<T>) :
         AbstractMatrix<T>() {
     protected fun idx(x: Int, y: Int): Int = y * cols + x
 
     override operator fun get(x: Int, y: Int): T = array[idx(x, y)]
 }
 
-class MutableArrayMatrix<T>(override val cols: Int, override val rows: Int, val array: Array<T>):
+internal class MutableArrayMatrix<T>(override val cols: Int, override val rows: Int, val array: Array<T>):
         ArrayMatrix<T>(cols, rows, array), MutableMatrix<T> {
     override fun set(x: Int, y: Int, value: T) {
         array[idx(x, y)] = value
     }
 }
 
+@Suppress("NON_PUBLIC_CALL_FROM_PUBLIC_INLINE")
 inline fun <reified T> Matrix<T>.toArray(): Array<T> {
     if (this is MutableArrayMatrix<T>) {
         return array.clone()
@@ -111,11 +112,13 @@ fun <T> mutableMatrixOf(cols: Int, rows: Int, vararg elements: T): Matrix<T> {
     return MutableArrayMatrix(cols, rows, elements)
 }
 
+@Suppress("NON_PUBLIC_CALL_FROM_PUBLIC_INLINE")
 inline fun <reified T> createMatrix(cols: Int, rows: Int, init: (Int, Int) -> T): Matrix<T> {
     val array = Array(cols * rows) { init(it % cols, it / cols) }
     return ArrayMatrix(cols, rows, array)
 }
 
+@Suppress("NON_PUBLIC_CALL_FROM_PUBLIC_INLINE")
 inline fun <reified T> createMutableMatrix(cols: Int, rows: Int, init: (Int, Int) -> T): MutableMatrix<T> {
     val array = Array(cols * rows) { init(it % cols, it / cols) }
     return MutableArrayMatrix(cols, rows, array)
