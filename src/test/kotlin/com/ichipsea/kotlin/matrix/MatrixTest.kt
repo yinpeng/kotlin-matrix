@@ -24,7 +24,7 @@ class MatrixTest: Spek({
 
         it("should equal to another matrix with same contents") {
             assertEquals(
-                    ArrayMatrix(2, 3, "ABABAB".toList().toTypedArray()),
+                    ListMatrix(2, 3, "ABABAB".toList()),
                     m
             )
         }

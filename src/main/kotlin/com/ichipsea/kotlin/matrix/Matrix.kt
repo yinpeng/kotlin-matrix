@@ -1,5 +1,7 @@
 package com.ichipsea.kotlin.matrix
 
+import java.util.ArrayList
+
 interface Matrix<out T> {
     val cols: Int
     val rows: Int
@@ -81,70 +83,71 @@ internal class TransposedMutableMatrix<T>(private val original: MutableMatrix<T>
 
 fun <T> Matrix<T>.transposedView() : Matrix<T> = TransposedMatrix(this)
 
-internal open class ArrayMatrix<out T>(override val cols: Int, override val rows: Int, private val array: Array<T>) :
+internal open class ListMatrix<out T>(override val cols: Int, override val rows: Int,
+                                      open protected val list: List<T>) :
         AbstractMatrix<T>() {
-    protected fun idx(x: Int, y: Int): Int = y * cols + x
-
-    override operator fun get(x: Int, y: Int): T = array[idx(x, y)]
+    override operator fun get(x: Int, y: Int): T = list[y*cols+x]
 }
 
-internal class MutableArrayMatrix<T>(override val cols: Int, override val rows: Int, val array: Array<T>):
-        ArrayMatrix<T>(cols, rows, array), MutableMatrix<T> {
+internal class MutableListMatrix<T>(override val cols: Int, override val rows: Int,
+                                    list: MutableList<T>):
+        ListMatrix<T>(cols, rows, list), MutableMatrix<T> {
+    override val list: MutableList<T>
+        get() = super.list as MutableList<T>
+
     override fun set(x: Int, y: Int, value: T) {
-        array[idx(x, y)] = value
-    }
-}
-
-@Suppress("NON_PUBLIC_CALL_FROM_PUBLIC_INLINE")
-inline fun <reified T> Matrix<T>.toArray(): Array<T> {
-    if (this is MutableArrayMatrix<T>) {
-        return array.clone()
-    } else {
-        return Array(size) { this[it % cols, it / cols] }
+        list[y*cols+x] = value
     }
 }
 
 fun <T> matrixOf(cols: Int, rows: Int, vararg elements: T): Matrix<T> {
-    return ArrayMatrix(cols, rows, elements)
+    return ListMatrix(cols, rows, elements.asList())
 }
 
 fun <T> mutableMatrixOf(cols: Int, rows: Int, vararg elements: T): Matrix<T> {
-    return MutableArrayMatrix(cols, rows, elements)
+    return MutableListMatrix(cols, rows, elements.toMutableList())
+}
+
+inline private fun <T> prepareListForMatrix(cols: Int, rows: Int, init: (Int, Int) -> T): ArrayList<T> {
+    val list = ArrayList<T>(cols * rows)
+    for (y in 0..rows - 1) {
+        for (x in 0..cols - 1) {
+            list.add(init(x, y))
+        }
+    }
+    return list
 }
 
 @Suppress("NON_PUBLIC_CALL_FROM_PUBLIC_INLINE")
-inline fun <reified T> createMatrix(cols: Int, rows: Int, init: (Int, Int) -> T): Matrix<T> {
-    val array = Array(cols * rows) { init(it % cols, it / cols) }
-    return ArrayMatrix(cols, rows, array)
+inline fun <T> createMatrix(cols: Int, rows: Int, init: (Int, Int) -> T): Matrix<T> {
+    return ListMatrix(cols, rows, prepareListForMatrix(cols, rows, init))
 }
 
 @Suppress("NON_PUBLIC_CALL_FROM_PUBLIC_INLINE")
-inline fun <reified T> createMutableMatrix(cols: Int, rows: Int, init: (Int, Int) -> T): MutableMatrix<T> {
-    val array = Array(cols * rows) { init(it % cols, it / cols) }
-    return MutableArrayMatrix(cols, rows, array)
+inline fun <T> createMutableMatrix(cols: Int, rows: Int, init: (Int, Int) -> T): MutableMatrix<T> {
+    return MutableListMatrix(cols, rows, prepareListForMatrix(cols, rows, init))
 }
 
-inline fun <T, reified U> Matrix<T>.map(f: (T) -> U): Matrix<U> {
-    return createMatrix(cols, rows) { x, y -> f(this[x, y]) }
+inline fun <T, U> Matrix<T>.map(transform: (T) -> U): Matrix<U> {
+    return createMatrix(cols, rows) { x, y -> transform(this[x, y]) }
 }
 
-inline fun <T, reified U> Matrix<T>.map(f: (Int, Int, T) -> U): Matrix<U> {
-    return createMatrix(cols, rows) { x, y -> f(x, y, this[x, y]) }
+inline fun <T, U> Matrix<T>.map(transform: (Int, Int, T) -> U): Matrix<U> {
+    return createMatrix(cols, rows) { x, y -> transform(x, y, this[x, y]) }
 }
 
-fun <T> Matrix<T>.forEach(f: (T) -> Unit): Unit {
+inline fun <T> Matrix<T>.forEach(action: (T) -> Unit): Unit {
     for (y in 0..rows-1) {
         for (x in 0..cols-1) {
-            f(this[x, y])
+            action(this[x, y])
         }
     }
 }
 
-fun <T> Matrix<T>.forEach(f: (Int, Int, T) -> Unit): Unit {
+inline fun <T> Matrix<T>.forEach(action: (Int, Int, T) -> Unit): Unit {
     for (y in 0..rows-1) {
         for (x in 0..cols-1) {
-            f(x, y, this[x, y])
+            action(x, y, this[x, y])
         }
     }
 }
-
