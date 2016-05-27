@@ -22,9 +22,9 @@ class MatrixTest: Spek({
             }
         }
 
-        it("should equal to another matrix with same contents") {
+        it("should be correct") {
             assertEquals(
-                    ListMatrix(2, 3, "ABABAB".toList()),
+                    "ABABAB".toList().toMatrix(2, 3),
                     m
             )
         }
@@ -45,10 +45,8 @@ class MatrixTest: Spek({
     }
 
     describe("matrix numeric operations") {
-        val a = matrixOf(3, 2,
-                1, 2, 3,
-                4, 5, 6
-        )
+        val a = (1..6).toMatrix(3, 2)
+
         val b = matrixOf(2, 4,
                 3, 7,
                 2, 2,

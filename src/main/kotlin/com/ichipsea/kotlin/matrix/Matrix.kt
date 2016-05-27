@@ -151,3 +151,35 @@ inline fun <T> Matrix<T>.forEach(action: (Int, Int, T) -> Unit): Unit {
         }
     }
 }
+
+fun <T> Matrix<T>.toList(): List<T> {
+    return prepareListForMatrix(cols, rows, { x, y -> this[x, y] })
+}
+
+fun <T> Matrix<T>.toMutableList(): MutableList<T> {
+    return prepareListForMatrix(cols, rows, { x, y -> this[x, y] })
+}
+
+private fun <T> Iterable<T>.toArrayList(size: Int): ArrayList<T> {
+    val list = ArrayList<T>(size)
+    val itr = iterator()
+
+    for (i in 0..size - 1) {
+        if (itr.hasNext()) {
+            list.add(itr.next())
+        } else {
+            throw IllegalArgumentException("No enough elements")
+        }
+    }
+    return list
+}
+
+fun <T> Iterable<T>.toMatrix(cols: Int, rows: Int): Matrix<T> {
+    val list = toArrayList(cols * rows)
+    return ListMatrix(cols, rows, list)
+}
+
+fun <T> Iterable<T>.toMutableMatrix(cols: Int, rows: Int): MutableMatrix<T> {
+    val list = toArrayList(cols * rows)
+    return MutableListMatrix(cols, rows, list)
+}
