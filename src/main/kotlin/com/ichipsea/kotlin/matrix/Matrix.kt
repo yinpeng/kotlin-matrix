@@ -128,20 +128,12 @@ inline fun <T> createMutableMatrix(cols: Int, rows: Int, init: (Int, Int) -> T):
     return MutableListMatrix(cols, rows, prepareListForMatrix(cols, rows, init))
 }
 
-inline fun <T, U> Matrix<T>.map(transform: (T) -> U): Matrix<U> {
-    return createMatrix(cols, rows) { x, y -> transform(this[x, y]) }
-}
-
 inline fun <T, U> Matrix<T>.mapIndexed(transform: (Int, Int, T) -> U): Matrix<U> {
     return createMatrix(cols, rows) { x, y -> transform(x, y, this[x, y]) }
 }
 
-inline fun <T> Matrix<T>.forEach(action: (T) -> Unit): Unit {
-    for (y in 0..rows-1) {
-        for (x in 0..cols-1) {
-            action(this[x, y])
-        }
-    }
+inline fun <T, U> Matrix<T>.map(transform: (T) -> U): Matrix<U> {
+    return mapIndexed { x, y, value -> transform(value) }
 }
 
 inline fun <T> Matrix<T>.forEachIndexed(action: (Int, Int, T) -> Unit): Unit {
@@ -150,6 +142,10 @@ inline fun <T> Matrix<T>.forEachIndexed(action: (Int, Int, T) -> Unit): Unit {
             action(x, y, this[x, y])
         }
     }
+}
+
+inline fun <T> Matrix<T>.forEach(action: (T) -> Unit): Unit {
+    forEachIndexed { x, y, value -> action(value) }
 }
 
 fun <T> Matrix<T>.toList(): List<T> {
