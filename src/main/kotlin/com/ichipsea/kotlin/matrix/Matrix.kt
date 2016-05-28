@@ -59,6 +59,8 @@ abstract class AbstractMatrix<out T>: Matrix<T> {
 
     override fun hashCode(): Int {
         var h = 17
+        h = h * 39 + cols
+        h = h * 39 + rows
         forEach { value -> h = h * 37 + (value?.hashCode() ?: 1)}
         return h
     }
@@ -83,6 +85,8 @@ internal class TransposedMutableMatrix<T>(private val original: MutableMatrix<T>
 
 fun <T> Matrix<T>.transposedView() : Matrix<T> = TransposedMatrix(this)
 
+fun <T> MutableMatrix<T>.transposedView(): MutableMatrix<T> = TransposedMutableMatrix(this)
+
 internal open class ListMatrix<out T>(override val cols: Int, override val rows: Int,
                                       open protected val list: List<T>) :
         AbstractMatrix<T>() {
@@ -104,7 +108,7 @@ fun <T> matrixOf(cols: Int, rows: Int, vararg elements: T): Matrix<T> {
     return ListMatrix(cols, rows, elements.asList())
 }
 
-fun <T> mutableMatrixOf(cols: Int, rows: Int, vararg elements: T): Matrix<T> {
+fun <T> mutableMatrixOf(cols: Int, rows: Int, vararg elements: T): MutableMatrix<T> {
     return MutableListMatrix(cols, rows, elements.toMutableList())
 }
 
