@@ -66,7 +66,7 @@ abstract class AbstractMatrix<out T>: Matrix<T> {
     }
 }
 
-internal open class TransposedMatrix<out T>(private val original: Matrix<T>): AbstractMatrix<T>() {
+internal open class TransposedMatrix<out T>(protected val original: Matrix<T>): AbstractMatrix<T>() {
     override val cols: Int
         get() = original.rows
 
@@ -76,10 +76,10 @@ internal open class TransposedMatrix<out T>(private val original: Matrix<T>): Ab
     override fun get(x: Int, y: Int): T = original[y, x]
 }
 
-internal class TransposedMutableMatrix<T>(private val original: MutableMatrix<T>) :
+internal class TransposedMutableMatrix<T>(original: MutableMatrix<T>) :
         TransposedMatrix<T>(original), MutableMatrix<T> {
     override fun set(x: Int, y: Int, value: T) {
-        original[y, x] = value
+        (original as MutableMatrix<T>)[y, x] = value
     }
 }
 
@@ -88,19 +88,15 @@ fun <T> Matrix<T>.transposedView() : Matrix<T> = TransposedMatrix(this)
 fun <T> MutableMatrix<T>.transposedView(): MutableMatrix<T> = TransposedMutableMatrix(this)
 
 internal open class ListMatrix<out T>(override val cols: Int, override val rows: Int,
-                                      open protected val list: List<T>) :
+                                      protected val list: List<T>) :
         AbstractMatrix<T>() {
     override operator fun get(x: Int, y: Int): T = list[y*cols+x]
 }
 
-internal class MutableListMatrix<T>(override val cols: Int, override val rows: Int,
-                                    list: MutableList<T>):
+internal class MutableListMatrix<T>(cols: Int, rows: Int, list: MutableList<T>):
         ListMatrix<T>(cols, rows, list), MutableMatrix<T> {
-    override val list: MutableList<T>
-        get() = super.list as MutableList<T>
-
     override fun set(x: Int, y: Int, value: T) {
-        list[y*cols+x] = value
+        (list as MutableList<T>)[y*cols+x] = value
     }
 }
 
