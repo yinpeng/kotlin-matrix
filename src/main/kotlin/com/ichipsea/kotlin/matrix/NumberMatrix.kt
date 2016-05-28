@@ -22,6 +22,14 @@ operator fun <M: Number, N: Number> Matrix<M>.times(other: Matrix<N>): Matrix<Do
     return map { x, y, value -> value.toDouble() * other[x, y].toDouble() }
 }
 
+operator fun <M: Number> Matrix<M>.times(other: Number): Matrix<Double> {
+    return map { it -> it.toDouble() * other.toDouble() }
+}
+
+operator fun <M: Number> Number.times(other: Matrix<M>): Matrix<Double> {
+    return other * this
+}
+
 infix fun <M: Number, N: Number> Matrix<M>.x(other: Matrix<N>): Matrix<Double> {
     if (rows !== other.cols)
         throw IllegalArgumentException("Matrices not match")

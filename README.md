@@ -72,6 +72,7 @@ val b = createMatrix(5, 2) { x, y -> 0.5 }
 println(a + b)
 println(a - b)
 println(a * b)      // dot product
+println(2 * b + a)
 val c = (1..6).toMatrix(2, 3)
 println(a x c)      // cross product
 ```

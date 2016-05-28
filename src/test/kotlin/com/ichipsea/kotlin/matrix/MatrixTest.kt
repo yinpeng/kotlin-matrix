@@ -206,6 +206,17 @@ class MatrixTest: Spek({
             assertFails { a - c }
         }
 
+        it("multiplication by number") {
+            assertEquals(
+                    matrixOf(3, 2,
+                            2.0, 4.0, 6.0,
+                            8.0, 10.0, 12.0
+                    ),
+                    a * 2.0
+            )
+            assertEquals(c * 0.8, 0.8 * c )
+        }
+
         it("dot product") {
             assertEquals(
                     matrixOf(3, 2,
