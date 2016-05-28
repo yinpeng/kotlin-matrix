@@ -20,7 +20,7 @@ abstract class AbstractMatrix<out T>: Matrix<T> {
     override fun toString(): String {
         val sb = StringBuilder()
         sb.append('[')
-        forEach { x, y, value ->
+        forEachIndexed { x, y, value ->
             if (x === 0)
                 sb.append('[')
             sb.append(value.toString())
@@ -41,16 +41,16 @@ abstract class AbstractMatrix<out T>: Matrix<T> {
         if (rows !== other.rows || cols !== other.cols) return false
 
         var eq = true
-        forEach { x, y, value ->
+        forEachIndexed { x, y, value ->
             if (value === null) {
                 if (other[x, y] !== null) {
                     eq = false
-                    return@forEach
+                    return@forEachIndexed
                 }
             } else {
                 if (!value.equals(other[x, y])) {
                     eq = false
-                    return@forEach
+                    return@forEachIndexed
                 }
             }
         }
@@ -61,7 +61,7 @@ abstract class AbstractMatrix<out T>: Matrix<T> {
         var h = 17
         h = h * 39 + cols
         h = h * 39 + rows
-        forEach { value -> h = h * 37 + (value?.hashCode() ?: 1)}
+        forEach { h = h * 37 + (it?.hashCode() ?: 1)}
         return h
     }
 }
@@ -83,9 +83,9 @@ internal class TransposedMutableMatrix<T>(original: MutableMatrix<T>) :
     }
 }
 
-fun <T> Matrix<T>.transposedView() : Matrix<T> = TransposedMatrix(this)
+fun <T> Matrix<T>.asTransposed() : Matrix<T> = TransposedMatrix(this)
 
-fun <T> MutableMatrix<T>.transposedView(): MutableMatrix<T> = TransposedMutableMatrix(this)
+fun <T> MutableMatrix<T>.asTransposed(): MutableMatrix<T> = TransposedMutableMatrix(this)
 
 internal open class ListMatrix<out T>(override val cols: Int, override val rows: Int,
                                       protected val list: List<T>) :
@@ -132,7 +132,7 @@ inline fun <T, U> Matrix<T>.map(transform: (T) -> U): Matrix<U> {
     return createMatrix(cols, rows) { x, y -> transform(this[x, y]) }
 }
 
-inline fun <T, U> Matrix<T>.map(transform: (Int, Int, T) -> U): Matrix<U> {
+inline fun <T, U> Matrix<T>.mapIndexed(transform: (Int, Int, T) -> U): Matrix<U> {
     return createMatrix(cols, rows) { x, y -> transform(x, y, this[x, y]) }
 }
 
@@ -144,7 +144,7 @@ inline fun <T> Matrix<T>.forEach(action: (T) -> Unit): Unit {
     }
 }
 
-inline fun <T> Matrix<T>.forEach(action: (Int, Int, T) -> Unit): Unit {
+inline fun <T> Matrix<T>.forEachIndexed(action: (Int, Int, T) -> Unit): Unit {
     for (y in 0..rows-1) {
         for (x in 0..cols-1) {
             action(x, y, this[x, y])

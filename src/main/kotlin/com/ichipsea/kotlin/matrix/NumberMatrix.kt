@@ -4,11 +4,11 @@ operator fun <M: Number, N: Number> Matrix<M>.plus(other: Matrix<N>): Matrix<Dou
     if (rows !== other.rows || cols !== other.cols)
         throw IllegalArgumentException("Matrices not match")
 
-    return map { x, y, value -> value.toDouble() + other[x, y].toDouble() }
+    return mapIndexed { x, y, value -> value.toDouble() + other[x, y].toDouble() }
 }
 
 operator fun <N: Number> Matrix<N>.unaryMinus(): Matrix<Double> {
-    return map { it -> -it.toDouble() }
+    return map { -it.toDouble() }
 }
 
 operator fun <M: Number, N: Number> Matrix<M>.minus(other: Matrix<N>): Matrix<Double> {
@@ -19,11 +19,11 @@ operator fun <M: Number, N: Number> Matrix<M>.times(other: Matrix<N>): Matrix<Do
     if (rows !== other.rows || cols !== other.cols)
         throw IllegalArgumentException("Matrices not match")
 
-    return map { x, y, value -> value.toDouble() * other[x, y].toDouble() }
+    return mapIndexed { x, y, value -> value.toDouble() * other[x, y].toDouble() }
 }
 
 operator fun <M: Number> Matrix<M>.times(other: Number): Matrix<Double> {
-    return map { it -> it.toDouble() * other.toDouble() }
+    return map { it.toDouble() * other.toDouble() }
 }
 
 operator fun <M: Number> Number.times(other: Matrix<M>): Matrix<Double> {

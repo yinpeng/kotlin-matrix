@@ -40,28 +40,29 @@ m[2, 2] = 5             // change an element of the mutable matrix
 
 ```kotlin
 val m1 = (1..100).toMatrix(20, 5)
-val m2 = m1.map { value -> value / 2.0 }
-val m3 = m1.map { x, y, value -> "${'A'+x-1}${y+1}: $value" }
+val m2 = m1.map { it / 2.0 }
+val m3 = m1.mapIndexed { x, y, value -> "${'A'+x-1}${y+1}: $value" }
 ```
 
 ### Use *forEach* to apply actions to all elements
 
 ```kotlin
 val m1 = (1..12).toMatrix(4, 3)
-m1.forEach { value ->
-    println(value)
+m1.forEach {
+    println(it)
 }
+
 val m2 = createMatrix(9, 9) { x, y -> (x+1)*(y+1) }
-m2.forEach { x, y, value ->
+m2.forEachIndexed { x, y, value ->
     println("$x*$y=$value")
 }
 ```
 
-### Transposed view
+### The transposed matrix
 
 ```kotlin
 val m1 = "ABCDEF".toList().toMatrix(3, 2)
-val m2 = m1.transposedView()
+val m2 = m1.asTransposed()
 ```
 
 ### Calculations (for matrices with number elements)

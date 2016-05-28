@@ -20,7 +20,7 @@ class MatrixTest: Spek({
         }
 
         it("should have 'A' in first column and 'B' in second column") {
-            m.forEach { x, y, value ->
+            m.forEachIndexed { x, y, value ->
                 assertEquals(if (x===0) 'A' else 'B', value)
             }
         }
@@ -43,15 +43,15 @@ class MatrixTest: Spek({
             )
         }
 
-        describe("transpose view") {
-            val t = m.transposedView()
+        describe("as transposed") {
+            val t = m.asTransposed()
             it ("transpose view should have 3 cols and 2 rows") {
                 assertEquals(3, t.cols)
                 assertEquals(2, t.rows)
             }
 
             it("transpose view should have 'A' in first row and 'B' in second row") {
-                t.forEach { x, y, value ->
+                t.forEachIndexed { x, y, value ->
                     assertEquals(if (y === 0) 'A' else 'B', value)
                 }
             }
@@ -82,13 +82,13 @@ class MatrixTest: Spek({
             assert(m[2, 1] === old)
         }
 
-        it ("should be mutable by transposed view") {
+        it ("should be mutable by asTransposed()") {
             val old = m[3, 0]
             val new = 888 to 111.0
-            m.transposedView()[0, 3] = new
+            m.asTransposed()[0, 3] = new
             assert(m[3, 0] === new)
             m[3, 0] = old
-            assert(m.transposedView()[0, 3] === old)
+            assert(m.asTransposed()[0, 3] === old)
         }
     }
 
@@ -154,18 +154,18 @@ class MatrixTest: Spek({
 
         it("test map()") {
             assertEquals(matrixOf(2, 3, "1", "2", "3", "4", "5", "6"),
-                    m.map { it -> it.toString() } )
+                    m.map { it.toString() } )
             assertEquals(createMatrix(2, 3, { x, y -> m[x, y] + x + y }),
-                    m.map { x, y, value -> value + x + y } )
+                    m.mapIndexed { x, y, value -> value + x + y } )
         }
 
         it("test forEach()") {
             var s = 0
-            m.forEach { value ->
-                s += value
+            m.forEach {
+                s += it
             }
             assertEquals(21, s)
-            m.forEach { x, y, value ->
+            m.forEachIndexed { x, y, value ->
                 if (x == y) s -= value
             }
             assertEquals(16, s)
