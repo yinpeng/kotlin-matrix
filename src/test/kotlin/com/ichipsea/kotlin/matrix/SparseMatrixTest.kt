@@ -4,8 +4,8 @@ import org.jetbrains.spek.api.Spek
 import kotlin.test.assertEquals
 
 class SparseMatrixTest: Spek({
-    describe("a sparse matrix") {
-        val m = sparseMatrix(1000, 800, 0.0) {
+    describe("a sparse double matrix") {
+        val m = sparseDoubleMatrix(1000, 800) {
             entry(0, 0, 5.5)
             entry(100, 100, 4.5)
             entry(300, 500, 12.3)
@@ -57,7 +57,38 @@ class SparseMatrixTest: Spek({
             m.forEachIndexedNonZero { x, y, value -> s2.add(Triple(x, y, value)) }
             assertEquals(mutableSetOf(Triple(0, 0, 5.5), Triple(100, 100, 4.5), Triple(300, 500, 12.3)), s2)
         }
+    }
 
+    describe("A mutable sparse String? matrix") {
+        val m = mutableSparseMatrix<String>(20, 800) {}
+
+        it("has 0 non-zero elements") {
+            assertEquals(0, m.nonZeroIndices.size)
+        }
+
+        it("adds new elements") {
+            m[10, 100] = "Good"
+            m[15, 500] = "Timing"
+            assertEquals(2, m.nonZeroIndices.size)
+            assertEquals("Good", m[10, 100])
+            assertEquals("Timing", m[15, 500])
+            assertEquals(null, m[1, 1])
+        }
+
+        it("set an elements to zero") {
+            m[10, 100] = null
+            assertEquals(1, m.nonZeroIndices.size)
+            assertEquals(null, m[10, 100])
+        }
+
+        it("remove an elements by nonZeroIndices") {
+            m.nonZeroIndices.remove(15 to 500)
+            assertEquals(null, m[15, 500])
+            assertEquals(0, m.nonZeroIndices.size)
+        }
+    }
+
+    describe("special internal tests") {
         it("has null value as non-zero") {
             val m2 = sparseMatrix<Int?>(100, 100, 1) {
                 for (i in 0..99) {

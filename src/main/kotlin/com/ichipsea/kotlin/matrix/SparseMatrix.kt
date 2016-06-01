@@ -1,8 +1,5 @@
 package com.ichipsea.kotlin.matrix
 
-import java.lang.reflect.ParameterizedType
-import kotlin.reflect.KClass
-
 interface SparseMatrix<out T> : Matrix<T> {
     val zero: T
     val nonZeroIndices: Set<Pair<Int, Int>>
@@ -73,12 +70,32 @@ inline fun <T> sparseMatrix(cols: Int, rows: Int, zero: T,
     return builder.build()
 }
 
+inline fun <T> sparseMatrix(cols: Int, rows: Int,
+                            init: SparseMatrixBuilder<T?>.() -> Unit): SparseMatrix<T?> {
+    return sparseMatrix(cols, rows, null, init)
+}
+
+inline fun sparseDoubleMatrix(cols: Int, rows: Int,
+                              init: SparseMatrixBuilder<Double>.() -> Unit): SparseMatrix<Double> {
+    return sparseMatrix(cols, rows, 0.0, init)
+}
+
 @Suppress("NON_PUBLIC_CALL_FROM_PUBLIC_INLINE")
 inline fun <T> mutableSparseMatrix(cols: Int, rows: Int, zero: T,
                                    init: SparseMatrixBuilder<T>.() -> Unit): MutableSparseMatrix<T> {
     val builder = SparseMatrixBuilder(cols, rows, zero)
     builder.init()
     return builder.buildMutable()
+}
+
+inline fun <T> mutableSparseMatrix(cols: Int, rows: Int,
+                                   init: SparseMatrixBuilder<T?>.() -> Unit): MutableSparseMatrix<T?> {
+    return mutableSparseMatrix(cols, rows, null, init)
+}
+
+inline fun mutableSparseDoubleMatrix(cols: Int, rows: Int,
+                                     init: SparseMatrixBuilder<Double>.() -> Unit): MutableSparseMatrix<Double> {
+    return mutableSparseMatrix(cols, rows, 0.0, init)
 }
 
 @Suppress("NON_PUBLIC_CALL_FROM_PUBLIC_INLINE")
