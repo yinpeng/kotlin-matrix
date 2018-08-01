@@ -55,7 +55,7 @@ infix fun <M : Number, N : Number> Matrix<M>.x(other: Matrix<N>): Matrix<Double>
     }
 }
 
-infix fun <M: Number, N: Number> Matrix<M>.xDeprecated(other: Matrix<N>): Matrix<Double> {
+infix fun <M: Number, N: Number> Matrix<M>.xReverse(other: Matrix<N>): Matrix<Double> {
     if (rows !== other.cols)
         throw IllegalArgumentException("Matrices not match")
 
