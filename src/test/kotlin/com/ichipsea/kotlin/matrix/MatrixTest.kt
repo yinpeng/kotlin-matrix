@@ -8,7 +8,7 @@ import kotlin.test.assertNotEquals
 
 class MatrixTest: Spek({
     describe("a character matrix") {
-        val m = createMatrix(2, 3) { x, y -> if (x == 0) 'A' else 'B' }
+        val m = createMatrix(2, 3) { x, _ -> if (x == 0) 'A' else 'B' }
 
         it("should return a matrix with 2 cols and 3 rows") {
             assertEquals(2, m.cols)
@@ -20,7 +20,7 @@ class MatrixTest: Spek({
         }
 
         it("should have 'A' in first column and 'B' in second column") {
-            m.forEachIndexed { x, y, value ->
+            m.forEachIndexed { x, _, value ->
                 assertEquals(if (x == 0) 'A' else 'B', value)
             }
         }
@@ -51,7 +51,7 @@ class MatrixTest: Spek({
             }
 
             it("transpose view should have 'A' in first row and 'B' in second row") {
-                t.forEachIndexed { x, y, value ->
+                t.forEachIndexed { _, y, value ->
                     assertEquals(if (y == 0) 'A' else 'B', value)
                 }
             }
@@ -118,7 +118,7 @@ class MatrixTest: Spek({
     }
 
     describe("conversions") {
-        val mm = createMutableMatrix(2, 2, { x, y -> x + y*10 })
+        val mm = createMutableMatrix(2, 2) { x, y -> x + y * 10 }
 
         val itr: Iterable<Int> = 0..9
 
@@ -155,7 +155,7 @@ class MatrixTest: Spek({
         it("test map()") {
             assertEquals(matrixOf(2, 3, "1", "2", "3", "4", "5", "6"),
                     m.map { it.toString() } )
-            assertEquals(createMatrix(2, 3, { x, y -> m[x, y] + x + y }),
+            assertEquals(createMatrix(2, 3) { x, y -> m[x, y] + x + y },
                     m.mapIndexed { x, y, value -> value + x + y } )
         }
 
@@ -175,7 +175,7 @@ class MatrixTest: Spek({
     describe("matrix numeric operations") {
         val a = (1..6).toMatrix(3, 2)
 
-        val b = createMatrix(3, 2, { x, y -> 0.5 })
+        val b = createMatrix(3, 2) { _, _ -> 0.5 }
 
         val c = matrixOf(2, 4,
                 3, 7,
