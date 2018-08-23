@@ -6,6 +6,9 @@ interface Matrix<out T> {
     val cols: Int
     val rows: Int
 
+    fun getRow(index: Int): List<T>
+    fun getColumn(index: Int): List<T>
+
     operator fun get(x: Int, y: Int): T
 }
 
@@ -17,6 +20,11 @@ interface MutableMatrix<T>: Matrix<T> {
 }
 
 abstract class AbstractMatrix<out T>: Matrix<T> {
+
+    override fun getRow(index: Int): List<T> = filterIndexed { _, row, _ -> row == index }
+
+    override fun getColumn(index: Int): List<T> = filterIndexed { col, row, t -> col == index }
+
     override fun toString(): String {
         val sb = StringBuilder()
         sb.append('[')
@@ -76,8 +84,7 @@ internal open class TransposedMatrix<out T>(protected val original: Matrix<T>): 
     override fun get(x: Int, y: Int): T = original[y, x]
 }
 
-internal class TransposedMutableMatrix<T>(original: MutableMatrix<T>) :
-        TransposedMatrix<T>(original), MutableMatrix<T> {
+internal class TransposedMutableMatrix<T>(original: MutableMatrix<T>): TransposedMatrix<T>(original), MutableMatrix<T> {
     override fun set(x: Int, y: Int, value: T) {
         (original as MutableMatrix<T>)[y, x] = value
     }
@@ -87,14 +94,16 @@ fun <T> Matrix<T>.asTransposed() : Matrix<T> = TransposedMatrix(this)
 
 fun <T> MutableMatrix<T>.asTransposed(): MutableMatrix<T> = TransposedMutableMatrix(this)
 
-internal open class ListMatrix<out T>(override val cols: Int, override val rows: Int,
-                                      protected val list: List<T>) :
-        AbstractMatrix<T>() {
+internal open class ListMatrix<out T>(
+        override val cols: Int,
+        override val rows: Int,
+        protected val list: List<T>): AbstractMatrix<T>() {
     override operator fun get(x: Int, y: Int): T = list[y*cols+x]
 }
 
-internal class MutableListMatrix<T>(cols: Int, rows: Int, list: MutableList<T>):
-        ListMatrix<T>(cols, rows, list), MutableMatrix<T> {
+internal class MutableListMatrix<T>(
+        cols: Int, rows: Int,
+        list: MutableList<T>): ListMatrix<T>(cols, rows, list), MutableMatrix<T> {
     override fun set(x: Int, y: Int, value: T) {
         (list as MutableList<T>)[y*cols+x] = value
     }
@@ -125,6 +134,14 @@ inline fun <T> createMutableMatrix(cols: Int, rows: Int, init: (Int, Int) -> T):
 inline fun <T, U> Matrix<T>.mapIndexed(transform: (Int, Int, T) -> U): Matrix<U> = createMatrix(cols, rows) { x, y -> transform(x, y, this[x, y]) }
 
 inline fun <T, U> Matrix<T>.map(transform: (T) -> U): Matrix<U> = mapIndexed { x, y, value -> transform(value) }
+
+inline fun <T> Matrix<T>.filterIndexed(predicate: (Int, Int, T) -> Boolean): List<T> {
+    val list = mutableListOf<T>()
+    forEachIndexed { x, y, value ->
+        if (predicate(x, y, value)) list.add(value)
+    }
+    return list
+}
 
 inline fun <T> Matrix<T>.forEachIndexed(action: (Int, Int, T) -> Unit) {
     for (y in 0 until rows) {
