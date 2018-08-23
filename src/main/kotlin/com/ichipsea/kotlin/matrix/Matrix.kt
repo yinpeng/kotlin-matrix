@@ -23,7 +23,7 @@ abstract class AbstractMatrix<out T>: Matrix<T> {
 
     override fun getRow(index: Int): List<T> = filterIndexed { _, row, _ -> row == index }
 
-    override fun getColumn(index: Int): List<T> = filterIndexed { col, row, t -> col == index }
+    override fun getColumn(index: Int): List<T> = filterIndexed { col, _, _ -> col == index }
 
     override fun toString(): String {
         val sb = StringBuilder()
@@ -133,7 +133,7 @@ inline fun <T> createMutableMatrix(cols: Int, rows: Int, init: (Int, Int) -> T):
 
 inline fun <T, U> Matrix<T>.mapIndexed(transform: (Int, Int, T) -> U): Matrix<U> = createMatrix(cols, rows) { x, y -> transform(x, y, this[x, y]) }
 
-inline fun <T, U> Matrix<T>.map(transform: (T) -> U): Matrix<U> = mapIndexed { x, y, value -> transform(value) }
+inline fun <T, U> Matrix<T>.map(transform: (T) -> U): Matrix<U> = mapIndexed { _, _, value -> transform(value) }
 
 inline fun <T> Matrix<T>.filterIndexed(predicate: (Int, Int, T) -> Boolean): List<T> {
     val list = mutableListOf<T>()
@@ -151,7 +151,7 @@ inline fun <T> Matrix<T>.forEachIndexed(action: (Int, Int, T) -> Unit) {
     }
 }
 
-inline fun <T> Matrix<T>.forEach(action: (T) -> Unit): Unit = forEachIndexed { x, y, value -> action(value) }
+inline fun <T> Matrix<T>.forEach(action: (T) -> Unit): Unit = forEachIndexed { _, _, value -> action(value) }
 
 fun <T> Matrix<T>.toList(): List<T> = prepareListForMatrix(cols, rows) { x, y -> this[x, y] }
 
