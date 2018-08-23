@@ -42,3 +42,15 @@ infix fun <M: Number, N: Number> Matrix<M>.x(other: Matrix<N>): Matrix<Double> {
         value
     }
 }
+
+infix fun <M: Number, N: Number> Matrix<M>.dot(other: Matrix<N>): Matrix<Double> {
+    if (cols != other.rows)
+        throw IllegalArgumentException("The matrices do not match: this has $cols columns, other has ${other.rows} rows")
+
+    return createMatrix(other.cols, rows) { x, y ->
+        var value = .0
+        for (i in 0 until cols)
+            value += this[i, y].toDouble() * other[x, i].toDouble()
+        value
+    }
+}

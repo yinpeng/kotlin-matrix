@@ -8,7 +8,7 @@ import kotlin.test.assertNotEquals
 
 class MatrixTest: Spek({
     describe("a character matrix") {
-        val m = createMatrix(2, 3) { x, y -> if (x===0) 'A' else 'B' }
+        val m = createMatrix(2, 3) { x, y -> if (x == 0) 'A' else 'B' }
 
         it("should return a matrix with 2 cols and 3 rows") {
             assertEquals(2, m.cols)
@@ -21,7 +21,7 @@ class MatrixTest: Spek({
 
         it("should have 'A' in first column and 'B' in second column") {
             m.forEachIndexed { x, y, value ->
-                assertEquals(if (x===0) 'A' else 'B', value)
+                assertEquals(if (x == 0) 'A' else 'B', value)
             }
         }
 
@@ -52,7 +52,7 @@ class MatrixTest: Spek({
 
             it("transpose view should have 'A' in first row and 'B' in second row") {
                 t.forEachIndexed { x, y, value ->
-                    assertEquals(if (y === 0) 'A' else 'B', value)
+                    assertEquals(if (y == 0) 'A' else 'B', value)
                 }
             }
         }
@@ -239,6 +239,17 @@ class MatrixTest: Spek({
                     a x c
             )
             assertFails { a x b }
+        }
+
+        it("matrix multiplication") {
+            assertEquals(
+                    matrixOf(2, 2,
+                            3.0, 3.0,
+                            7.5, 7.5
+                    ),
+                    a dot b.asTransposed()
+            )
+            assertFails { a dot c }
         }
     }
 

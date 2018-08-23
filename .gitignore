@@ -5,3 +5,4 @@ gradlew
 gradlew.bat
 build
 kotlin-matrix.iml
+out/
