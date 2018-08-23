@@ -2,7 +2,7 @@ package com.ichipsea.kotlin.matrix
 
 operator fun <M: Number, N: Number> Matrix<M>.plus(other: Matrix<N>): Matrix<Double> {
     if (rows != other.rows || cols != other.cols)
-        throw IllegalArgumentException("Matrices not match")
+        throw IllegalArgumentException("The matrices do not match")
 
     return mapIndexed { x, y, value -> value.toDouble() + other[x, y].toDouble() }
 }
@@ -17,7 +17,7 @@ operator fun <M: Number, N: Number> Matrix<M>.minus(other: Matrix<N>): Matrix<Do
 
 operator fun <M: Number, N: Number> Matrix<M>.times(other: Matrix<N>): Matrix<Double> {
     if (rows != other.rows || cols != other.cols)
-        throw IllegalArgumentException("Matrices not match")
+        throw IllegalArgumentException("The matrices do not match")
 
     return mapIndexed { x, y, value -> value.toDouble() * other[x, y].toDouble() }
 }
@@ -30,9 +30,20 @@ operator fun <M: Number> Number.times(other: Matrix<M>): Matrix<Double> {
     return other * this
 }
 
+operator fun <M: Number, N: Number> Matrix<M>.div(other: Matrix<N>): Matrix<Double> {
+    if (rows != other.rows || cols != other.cols)
+        throw IllegalArgumentException("The matrices do not match")
+
+    return mapIndexed { x, y, value -> value.toDouble() / other[x, y].toDouble() }
+}
+
+operator fun <M: Number> Matrix<M>.div(other: Number): Matrix<Double> {
+    return map { it.toDouble() / other.toDouble() }
+}
+
 infix fun <M: Number, N: Number> Matrix<M>.x(other: Matrix<N>): Matrix<Double> {
     if (rows != other.cols)
-        throw IllegalArgumentException("Matrices not match")
+        throw IllegalArgumentException("The matrices do not match")
 
     return createMatrix(cols, other.rows) { x, y ->
         var value = .0
