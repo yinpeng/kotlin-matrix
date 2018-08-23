@@ -7,13 +7,9 @@ operator fun <M: Number, N: Number> Matrix<M>.plus(other: Matrix<N>): Matrix<Dou
     return mapIndexed { x, y, value -> value.toDouble() + other[x, y].toDouble() }
 }
 
-operator fun <N: Number> Matrix<N>.unaryMinus(): Matrix<Double> {
-    return map { -it.toDouble() }
-}
+operator fun <N: Number> Matrix<N>.unaryMinus(): Matrix<Double> = map { -it.toDouble() }
 
-operator fun <M: Number, N: Number> Matrix<M>.minus(other: Matrix<N>): Matrix<Double> {
-    return this + (-other)
-}
+operator fun <M: Number, N: Number> Matrix<M>.minus(other: Matrix<N>): Matrix<Double> = this + (-other)
 
 operator fun <M: Number, N: Number> Matrix<M>.times(other: Matrix<N>): Matrix<Double> {
     if (rows != other.rows || cols != other.cols)
@@ -22,13 +18,9 @@ operator fun <M: Number, N: Number> Matrix<M>.times(other: Matrix<N>): Matrix<Do
     return mapIndexed { x, y, value -> value.toDouble() * other[x, y].toDouble() }
 }
 
-operator fun <M: Number> Matrix<M>.times(other: Number): Matrix<Double> {
-    return map { it.toDouble() * other.toDouble() }
-}
+operator fun <M: Number> Matrix<M>.times(other: Number): Matrix<Double> = map { it.toDouble() * other.toDouble() }
 
-operator fun <M: Number> Number.times(other: Matrix<M>): Matrix<Double> {
-    return other * this
-}
+operator fun <M: Number> Number.times(other: Matrix<M>): Matrix<Double> = other * this
 
 operator fun <M: Number, N: Number> Matrix<M>.div(other: Matrix<N>): Matrix<Double> {
     if (rows != other.rows || cols != other.cols)
@@ -37,9 +29,7 @@ operator fun <M: Number, N: Number> Matrix<M>.div(other: Matrix<N>): Matrix<Doub
     return mapIndexed { x, y, value -> value.toDouble() / other[x, y].toDouble() }
 }
 
-operator fun <M: Number> Matrix<M>.div(other: Number): Matrix<Double> {
-    return map { it.toDouble() / other.toDouble() }
-}
+operator fun <M: Number> Matrix<M>.div(other: Number): Matrix<Double> = map { it.toDouble() / other.toDouble() }
 
 infix fun <M: Number, N: Number> Matrix<M>.x(other: Matrix<N>): Matrix<Double> {
     if (rows != other.cols)
