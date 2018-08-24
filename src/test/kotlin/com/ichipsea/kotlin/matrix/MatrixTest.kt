@@ -1,11 +1,16 @@
 package com.ichipsea.kotlin.matrix
 
 import org.jetbrains.spek.api.Spek
+import org.jetbrains.spek.api.dsl.describe
+import org.jetbrains.spek.api.dsl.it
+import org.junit.platform.runner.JUnitPlatform
+import org.junit.runner.RunWith
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 
+@RunWith(JUnitPlatform::class)
 class MatrixTest: Spek({
     describe("a character matrix") {
         val m = createMatrix(2, 3) { x, _ -> if (x == 0) 'A' else 'B' }
@@ -64,7 +69,7 @@ class MatrixTest: Spek({
                 0 to 7.0, 0 to 1.8, 9 to 1000.35, 972345 to 11.3
         )
 
-        it("should return a matrix with 4 cols and 3 rows") {
+        it("should return a matrix with 4 cols and 2 rows") {
             assertEquals(4, m.cols)
             assertEquals(2, m.rows)
         }
@@ -146,6 +151,26 @@ class MatrixTest: Spek({
             assertEquals(m, mutableMatrixOf(5, 2, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9))
             m[0, 0] = 10000
             assertFalse(itr.contains(10000), "it should not change the original Iterable through the mutable matrix)")
+        }
+    }
+
+    describe("getters") {
+        val m = matrixOf(2, 3, 1, 2, 3, 4, 5, 6)
+
+        it("should get rows and columns") {
+            val firstRow = listOf(1, 2)
+            val secondRow = listOf(3, 4)
+            val thirdRow = listOf(5, 6)
+            val firstColumn = listOf(1, 3, 5)
+            val secondColumn = listOf(2, 4, 6)
+            assertEquals(firstRow, m[0])
+            assertEquals(firstRow, m.getRow(0))
+            assertEquals(secondRow, m[1])
+            assertEquals(secondRow, m.getRow(1))
+            assertEquals(thirdRow, m[2])
+            assertEquals(thirdRow, m.getRow(2))
+            assertEquals(firstColumn, m.getColumn(0))
+            assertEquals(secondColumn, m.getColumn(1))
         }
     }
 

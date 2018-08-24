@@ -10,6 +10,7 @@ interface Matrix<out T> {
     fun getColumn(index: Int): List<T>
 
     operator fun get(x: Int, y: Int): T
+    operator fun get(row: Int): List<T> = getRow(row)
 }
 
 val <T> Matrix<T>.size: Int
@@ -56,7 +57,7 @@ abstract class AbstractMatrix<out T>: Matrix<T> {
                     return@forEachIndexed
                 }
             } else {
-                if (!value.equals(other[x, y])) {
+                if (value != other[x, y]) {
                     eq = false
                     return@forEachIndexed
                 }
@@ -151,7 +152,7 @@ inline fun <T> Matrix<T>.forEachIndexed(action: (Int, Int, T) -> Unit) {
     }
 }
 
-inline fun <T> Matrix<T>.forEach(action: (T) -> Unit): Unit = forEachIndexed { _, _, value -> action(value) }
+inline fun <T> Matrix<T>.forEach(action: (T) -> Unit) = forEachIndexed { _, _, value -> action(value) }
 
 fun <T> Matrix<T>.toList(): List<T> = prepareListForMatrix(cols, rows) { x, y -> this[x, y] }
 
