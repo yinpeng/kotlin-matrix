@@ -1,8 +1,7 @@
-.idea
-.gradle
-gradle
-gradlew
-gradlew.bat
-build
-kotlin-matrix.iml
+*.jar
+
+.gradle/
+.idea/
+build/
 out/
+kotlin-matrix.iml
