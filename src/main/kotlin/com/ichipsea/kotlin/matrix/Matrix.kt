@@ -6,8 +6,8 @@ interface Matrix<out T> {
     val cols: Int
     val rows: Int
 
-    fun getRow(index: Int): List<T>
-    fun getColumn(index: Int): List<T>
+    fun getRow(index: Int): List<T> = filterIndexed { _, row, _ -> row == index }
+    fun getColumn(index: Int): List<T> = filterIndexed { col, _, _ -> col == index }
 
     operator fun get(x: Int, y: Int): T
     operator fun get(row: Int): List<T> = getRow(row)
@@ -21,10 +21,6 @@ interface MutableMatrix<T>: Matrix<T> {
 }
 
 abstract class AbstractMatrix<out T>: Matrix<T> {
-
-    override fun getRow(index: Int): List<T> = filterIndexed { _, row, _ -> row == index }
-
-    override fun getColumn(index: Int): List<T> = filterIndexed { col, _, _ -> col == index }
 
     override fun toString(): String {
         val sb = StringBuilder()
