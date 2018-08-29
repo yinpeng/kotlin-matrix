@@ -1,14 +1,19 @@
 package com.ichipsea.kotlin.matrix
 
 import org.jetbrains.spek.api.Spek
+import org.jetbrains.spek.api.dsl.describe
+import org.jetbrains.spek.api.dsl.it
+import org.junit.platform.runner.JUnitPlatform
+import org.junit.runner.RunWith
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 
+@RunWith(JUnitPlatform::class)
 class MatrixTest: Spek({
     describe("a character matrix") {
-        val m = createMatrix(2, 3) { x, y -> if (x===0) 'A' else 'B' }
+        val m = createMatrix(2, 3) { x, _ -> if (x == 0) 'A' else 'B' }
 
         it("should return a matrix with 2 cols and 3 rows") {
             assertEquals(2, m.cols)
@@ -20,8 +25,8 @@ class MatrixTest: Spek({
         }
 
         it("should have 'A' in first column and 'B' in second column") {
-            m.forEachIndexed { x, y, value ->
-                assertEquals(if (x===0) 'A' else 'B', value)
+            m.forEachIndexed { x, _, value ->
+                assertEquals(if (x == 0) 'A' else 'B', value)
             }
         }
 
@@ -51,8 +56,8 @@ class MatrixTest: Spek({
             }
 
             it("transpose view should have 'A' in first row and 'B' in second row") {
-                t.forEachIndexed { x, y, value ->
-                    assertEquals(if (y === 0) 'A' else 'B', value)
+                t.forEachIndexed { _, y, value ->
+                    assertEquals(if (y == 0) 'A' else 'B', value)
                 }
             }
         }
@@ -64,7 +69,7 @@ class MatrixTest: Spek({
                 0 to 7.0, 0 to 1.8, 9 to 1000.35, 972345 to 11.3
         )
 
-        it("should return a matrix with 4 cols and 3 rows") {
+        it("should return a matrix with 4 cols and 2 rows") {
             assertEquals(4, m.cols)
             assertEquals(2, m.rows)
         }
@@ -118,7 +123,7 @@ class MatrixTest: Spek({
     }
 
     describe("conversions") {
-        val mm = createMutableMatrix(2, 2, { x, y -> x + y*10 })
+        val mm = createMutableMatrix(2, 2) { x, y -> x + y * 10 }
 
         val itr: Iterable<Int> = 0..9
 
@@ -149,13 +154,33 @@ class MatrixTest: Spek({
         }
     }
 
+    describe("getters") {
+        val m = matrixOf(2, 3, 1, 2, 3, 4, 5, 6)
+
+        it("should get rows and columns") {
+            val firstRow = listOf(1, 2)
+            val secondRow = listOf(3, 4)
+            val thirdRow = listOf(5, 6)
+            val firstColumn = listOf(1, 3, 5)
+            val secondColumn = listOf(2, 4, 6)
+            assertEquals(firstRow, m[0])
+            assertEquals(firstRow, m.getRow(0))
+            assertEquals(secondRow, m[1])
+            assertEquals(secondRow, m.getRow(1))
+            assertEquals(thirdRow, m[2])
+            assertEquals(thirdRow, m.getRow(2))
+            assertEquals(firstColumn, m.getColumn(0))
+            assertEquals(secondColumn, m.getColumn(1))
+        }
+    }
+
     describe("map and forEach") {
         val m = matrixOf(2, 3, 1, 2, 3, 4, 5, 6)
 
         it("test map()") {
             assertEquals(matrixOf(2, 3, "1", "2", "3", "4", "5", "6"),
                     m.map { it.toString() } )
-            assertEquals(createMatrix(2, 3, { x, y -> m[x, y] + x + y }),
+            assertEquals(createMatrix(2, 3) { x, y -> m[x, y] + x + y },
                     m.mapIndexed { x, y, value -> value + x + y } )
         }
 
@@ -175,7 +200,7 @@ class MatrixTest: Spek({
     describe("matrix numeric operations") {
         val a = (1..6).toMatrix(3, 2)
 
-        val b = createMatrix(3, 2, { x, y -> 0.5 })
+        val b = createMatrix(3, 2) { _, _ -> 0.5 }
 
         val c = matrixOf(2, 4,
                 3, 7,
@@ -239,6 +264,17 @@ class MatrixTest: Spek({
                     a x c
             )
             assertFails { a x b }
+        }
+
+        it("matrix multiplication") {
+            assertEquals(
+                    matrixOf(2, 2,
+                            3.0, 3.0,
+                            7.5, 7.5
+                    ),
+                    a dot b.asTransposed()
+            )
+            assertFails { a dot c }
         }
     }
 

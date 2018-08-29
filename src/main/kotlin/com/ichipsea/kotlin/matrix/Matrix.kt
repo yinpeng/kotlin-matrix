@@ -6,7 +6,11 @@ interface Matrix<out T> {
     val cols: Int
     val rows: Int
 
+    fun getRow(index: Int): List<T> = filterIndexed { _, row, _ -> row == index }
+    fun getColumn(index: Int): List<T> = filterIndexed { col, _, _ -> col == index }
+
     operator fun get(x: Int, y: Int): T
+    operator fun get(row: Int): List<T> = getRow(row)
 }
 
 val <T> Matrix<T>.size: Int
@@ -17,14 +21,15 @@ interface MutableMatrix<T>: Matrix<T> {
 }
 
 abstract class AbstractMatrix<out T>: Matrix<T> {
+
     override fun toString(): String {
         val sb = StringBuilder()
         sb.append('[')
         forEachIndexed { x, y, value ->
-            if (x === 0)
+            if (x == 0)
                 sb.append('[')
             sb.append(value.toString())
-            if (x===cols-1) {
+            if (x == cols - 1) {
                 sb.append(']')
                 if (y < rows-1)
                     sb.append(", ")
@@ -38,7 +43,7 @@ abstract class AbstractMatrix<out T>: Matrix<T> {
 
     override fun equals(other: Any?): Boolean {
         if (other !is Matrix<*>) return false
-        if (rows !== other.rows || cols !== other.cols) return false
+        if (rows != other.rows || cols != other.cols) return false
 
         var eq = true
         forEachIndexed { x, y, value ->
@@ -48,7 +53,7 @@ abstract class AbstractMatrix<out T>: Matrix<T> {
                     return@forEachIndexed
                 }
             } else {
-                if (!value.equals(other[x, y])) {
+                if (value != other[x, y]) {
                     eq = false
                     return@forEachIndexed
                 }
@@ -76,8 +81,7 @@ internal open class TransposedMatrix<out T>(protected val original: Matrix<T>): 
     override fun get(x: Int, y: Int): T = original[y, x]
 }
 
-internal class TransposedMutableMatrix<T>(original: MutableMatrix<T>) :
-        TransposedMatrix<T>(original), MutableMatrix<T> {
+internal class TransposedMutableMatrix<T>(original: MutableMatrix<T>): TransposedMatrix<T>(original), MutableMatrix<T> {
     override fun set(x: Int, y: Int, value: T) {
         (original as MutableMatrix<T>)[y, x] = value
     }
@@ -87,31 +91,29 @@ fun <T> Matrix<T>.asTransposed() : Matrix<T> = TransposedMatrix(this)
 
 fun <T> MutableMatrix<T>.asTransposed(): MutableMatrix<T> = TransposedMutableMatrix(this)
 
-internal open class ListMatrix<out T>(override val cols: Int, override val rows: Int,
-                                      protected val list: List<T>) :
-        AbstractMatrix<T>() {
+internal open class ListMatrix<out T>(
+        override val cols: Int,
+        override val rows: Int,
+        protected val list: List<T>): AbstractMatrix<T>() {
     override operator fun get(x: Int, y: Int): T = list[y*cols+x]
 }
 
-internal class MutableListMatrix<T>(cols: Int, rows: Int, list: MutableList<T>):
-        ListMatrix<T>(cols, rows, list), MutableMatrix<T> {
+internal class MutableListMatrix<T>(
+        cols: Int, rows: Int,
+        list: MutableList<T>): ListMatrix<T>(cols, rows, list), MutableMatrix<T> {
     override fun set(x: Int, y: Int, value: T) {
         (list as MutableList<T>)[y*cols+x] = value
     }
 }
 
-fun <T> matrixOf(cols: Int, rows: Int, vararg elements: T): Matrix<T> {
-    return ListMatrix(cols, rows, elements.asList())
-}
+fun <T> matrixOf(cols: Int, rows: Int, vararg elements: T): Matrix<T> = ListMatrix(cols, rows, elements.asList())
 
-fun <T> mutableMatrixOf(cols: Int, rows: Int, vararg elements: T): MutableMatrix<T> {
-    return MutableListMatrix(cols, rows, elements.toMutableList())
-}
+fun <T> mutableMatrixOf(cols: Int, rows: Int, vararg elements: T): MutableMatrix<T> = MutableListMatrix(cols, rows, elements.toMutableList())
 
-inline private fun <T> prepareListForMatrix(cols: Int, rows: Int, init: (Int, Int) -> T): ArrayList<T> {
+private inline fun <T> prepareListForMatrix(cols: Int, rows: Int, init: (Int, Int) -> T): ArrayList<T> {
     val list = ArrayList<T>(cols * rows)
-    for (y in 0..rows - 1) {
-        for (x in 0..cols - 1) {
+    for (y in 0 until rows) {
+        for (x in 0 until cols) {
             list.add(init(x, y))
         }
     }
@@ -119,48 +121,44 @@ inline private fun <T> prepareListForMatrix(cols: Int, rows: Int, init: (Int, In
 }
 
 @Suppress("NON_PUBLIC_CALL_FROM_PUBLIC_INLINE")
-inline fun <T> createMatrix(cols: Int, rows: Int, init: (Int, Int) -> T): Matrix<T> {
-    return ListMatrix(cols, rows, prepareListForMatrix(cols, rows, init))
-}
+inline fun <T> createMatrix(cols: Int, rows: Int, init: (Int, Int) -> T): Matrix<T> =
+        ListMatrix(cols, rows, prepareListForMatrix(cols, rows, init))
 
 @Suppress("NON_PUBLIC_CALL_FROM_PUBLIC_INLINE")
-inline fun <T> createMutableMatrix(cols: Int, rows: Int, init: (Int, Int) -> T): MutableMatrix<T> {
-    return MutableListMatrix(cols, rows, prepareListForMatrix(cols, rows, init))
+inline fun <T> createMutableMatrix(cols: Int, rows: Int, init: (Int, Int) -> T): MutableMatrix<T> =
+        MutableListMatrix(cols, rows, prepareListForMatrix(cols, rows, init))
+
+inline fun <T, U> Matrix<T>.mapIndexed(transform: (Int, Int, T) -> U): Matrix<U> = createMatrix(cols, rows) { x, y -> transform(x, y, this[x, y]) }
+
+inline fun <T, U> Matrix<T>.map(transform: (T) -> U): Matrix<U> = mapIndexed { _, _, value -> transform(value) }
+
+inline fun <T> Matrix<T>.filterIndexed(predicate: (Int, Int, T) -> Boolean): List<T> {
+    val list = mutableListOf<T>()
+    forEachIndexed { x, y, value ->
+        if (predicate(x, y, value)) list.add(value)
+    }
+    return list
 }
 
-inline fun <T, U> Matrix<T>.mapIndexed(transform: (Int, Int, T) -> U): Matrix<U> {
-    return createMatrix(cols, rows) { x, y -> transform(x, y, this[x, y]) }
-}
-
-inline fun <T, U> Matrix<T>.map(transform: (T) -> U): Matrix<U> {
-    return mapIndexed { x, y, value -> transform(value) }
-}
-
-inline fun <T> Matrix<T>.forEachIndexed(action: (Int, Int, T) -> Unit): Unit {
-    for (y in 0..rows-1) {
-        for (x in 0..cols-1) {
+inline fun <T> Matrix<T>.forEachIndexed(action: (Int, Int, T) -> Unit) {
+    for (y in 0 until rows) {
+        for (x in 0 until cols) {
             action(x, y, this[x, y])
         }
     }
 }
 
-inline fun <T> Matrix<T>.forEach(action: (T) -> Unit): Unit {
-    forEachIndexed { x, y, value -> action(value) }
-}
+inline fun <T> Matrix<T>.forEach(action: (T) -> Unit) = forEachIndexed { _, _, value -> action(value) }
 
-fun <T> Matrix<T>.toList(): List<T> {
-    return prepareListForMatrix(cols, rows, { x, y -> this[x, y] })
-}
+fun <T> Matrix<T>.toList(): List<T> = prepareListForMatrix(cols, rows) { x, y -> this[x, y] }
 
-fun <T> Matrix<T>.toMutableList(): MutableList<T> {
-    return prepareListForMatrix(cols, rows, { x, y -> this[x, y] })
-}
+fun <T> Matrix<T>.toMutableList(): MutableList<T> = prepareListForMatrix(cols, rows) { x, y -> this[x, y] }
 
 private fun <T> Iterable<T>.toArrayList(size: Int): ArrayList<T> {
     val list = ArrayList<T>(size)
     val itr = iterator()
 
-    for (i in 0..size - 1) {
+    for (i in 0 until size) {
         if (itr.hasNext()) {
             list.add(itr.next())
         } else {
