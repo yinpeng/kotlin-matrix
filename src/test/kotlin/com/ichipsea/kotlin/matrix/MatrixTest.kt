@@ -175,7 +175,7 @@ class MatrixTest: Spek({
     describe("matrix numeric operations") {
         val a = (1..6).toMatrix(3, 2)
 
-        val b = createMatrix(3, 2, { x, y -> 0.5 })
+        val b = createMatrix(3, 2) { _, _ -> 0.5 }
 
         val c = matrixOf(2, 4,
                 3, 7,
@@ -236,9 +236,9 @@ class MatrixTest: Spek({
                             1.0, 2.0, 3.0,
                             29.0, 43.0, 57.0
                     ),
-                    a x c
+                    c x a
             )
-            assertFails { a x b }
+            assertFails { b x a }
         }
     }
 

@@ -2,7 +2,7 @@ package com.ichipsea.kotlin.matrix
 
 import java.util.*
 
-interface Matrix<T> {
+interface Matrix<out T> {
     val cols: Int
     val rows: Int
 
@@ -23,22 +23,22 @@ interface MutableMatrix<T> : Matrix<T> {
     operator fun set(x: Int, y: Int, value: T)
 }
 
-abstract class AbstractMatrix<T> : Matrix<T> {
+abstract class AbstractMatrix<out T> : Matrix<T> {
 
     override fun row(row: Int): List<T> {
-        var rowElemetns: List<T> = mutableListOf()
-        forEachIndexed { x, y, value ->
-            if (y == row) rowElemetns += value
+        val rowElements: MutableList<T> = mutableListOf()
+        forEachIndexed { _, y, value ->
+            if (y == row) rowElements += value
         }
-        return rowElemetns
+        return rowElements
     }
 
     override fun col(col: Int): List<T> {
-        var colElemetns: List<T> = mutableListOf()
-        forEachIndexed { x, y, value ->
-            if (x == col) colElemetns += value
+        val colElements: MutableList<T> = mutableListOf()
+        forEachIndexed { x, _, value ->
+            if (x == col) colElements += value
         }
-        return colElemetns
+        return colElements
     }
 
 
@@ -102,7 +102,7 @@ abstract class AbstractMatrix<T> : Matrix<T> {
     }
 }
 
-internal open class TransposedMatrix<T>(protected val original: Matrix<T>) : AbstractMatrix<T>() {
+internal open class TransposedMatrix<out T>(protected val original: Matrix<T>) : AbstractMatrix<T>() {
     override val cols: Int
         get() = original.rows
 
